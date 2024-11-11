@@ -184,15 +184,14 @@ void BTree<T, ORDER>::insertNonFull(BTreeNode<T, ORDER> *root, T value)
     // detect last index
     int idx = root->n - 1;
 
-    // search pivot position for the value
-    while (idx >= 0 && value < root->keys[idx])
-    {
-        root->keys[idx + 1] = root->keys[idx];
-        idx--;
-    }
-
     if (root->leaf)
     {
+        // search pivot position for the value
+        while (idx >= 0 && value < root->keys[idx])
+        {
+            root->keys[idx + 1] = root->keys[idx];
+            idx--;
+        }
         // assign the value
         root->keys[idx + 1] = value;
         // increase the count of keys
@@ -200,6 +199,10 @@ void BTree<T, ORDER>::insertNonFull(BTreeNode<T, ORDER> *root, T value)
     }
     else
     {
+        // search pivot position for the value
+        while (idx >= 0 && value < root->keys[idx])
+            idx--;
+
         // increase the idx
         idx++;
 
@@ -216,7 +219,7 @@ void BTree<T, ORDER>::insertNonFull(BTreeNode<T, ORDER> *root, T value)
             if (root->keys[idx] < value)
                 idx++;
         }
-        /// now insert for non emty
+        // now insert for non emty
         insertNonFull(root->children[idx], value);
     }
 }
