@@ -41,6 +41,21 @@ class BTree
     // method to split a child or a node
     void splitChild(BTreeNode<T, ORDER> *parent, int i);
 
+    // method to erase a key
+    void remove(BTreeNode<T, ORDER> *root, T key);
+
+    // method to erase a key from a leaf node
+    void removeFromLeaf(BTreeNode<T, ORDER> *root, int idx);
+
+    // method to erase a key from a non leaf node
+    void removeFromNonLeaf(BTreeNode<T, ORDER> *root, int idx);
+
+    T getSuccessor(BTreeNode<T, ORDER> *root, int idx);
+
+    T getPredecessor(BTreeNode<T, ORDER> *root, int idx);
+
+    void merge(BTreeNode<T, ORDER> *root, int idx);
+
 public:
     // initialize the object
     BTree()
@@ -57,7 +72,7 @@ public:
     BTreeNode<T, ORDER> search(T key);
 
     // method to erase
-    // void erase(T key);
+    void remove(T key);
 };
 
 template <typename T, int ORDER>
@@ -240,6 +255,105 @@ void BTree<T, ORDER>::insert(T value)
     insertNonFull(root, value);
 }
 
+template <typename T, int ORDER>
+void BTree<T, ORDER>::remove(T key)
+{
+    if (!root)
+    {
+        cout << "Tree is empty\n";
+        return;
+    }
+
+    remove(root, key);
+}
+
+template <typename T, int ORDER>
+void BTree<T, ORDER>::remove(BTreeNode<T, ORDER> *root, T key)
+{
+    int idx = 0;
+
+    // find the key index
+    while (idx < root->n && key > root->keys[idx])
+        idx++;
+
+    // if key is found
+    if (idx < root->n && key == root->keys[idx])
+    {
+        // call the method to erase the value
+        if (root->leaf)
+            removeFromLeaf(root, idx);
+        else
+            removeFromNonLeaf(root, idx);
+    }
+    else
+    {
+        // control will enter in this block when the key should present in child node
+        // if current node is a leaf node then there is not child. Hence the key is not presnt in the tree
+        if (root->leaf)
+        {
+            cout << key << " is not present in the tree\n";
+            return;
+        }
+
+        // invoke this function for the child
+        remove(root->children[idx], key);
+
+        // balance the tree
+        if (root->children[idx]->n < ceil(ORDER - 2) - 1)
+            fill(root, idx);
+
+        // pending / updation/ wrong
+    }
+}
+
+template <typename T, int ORDER>
+void BTree<T, ORDER>::removeFromLeaf(BTreeNode<T, ORDER> *root, int idx)
+{
+    idx++;
+
+    // left shift all the values
+    while (idx < root->n)
+    {
+        root->keys[idx - 1] = root->keys[idx];
+        idx++;
+    }
+    // decrease the size by one
+    root->n--;
+}
+
+template <typename T, int ORDER>
+void BTree<T, ORDER>::removeFromNonLeaf(BTreeNode<T, ORDER> *root, int idx)
+{
+    // pending
+}
+
+template <typename T, int ORDER>
+T BTree<T, ORDER>::getSuccessor(BTreeNode<T, ORDER> *root, int idx)
+{
+    root = root->children[idx + 1];
+
+    while (!root->leaf)
+        root = root->children[0];
+
+    return root->keys[0];
+}
+
+template <typename T, int ORDER>
+T BTree<T, ORDER>::getPredecessor(BTreeNode<T, ORDER> *root, int idx)
+{
+    root = root->children[idx];
+
+    while (!root->leaf)
+        root = root->children[root->n];
+
+    return root->keys[root->n - 1];
+}
+
+template <typename T, int ORDER>
+void BTree<T, ORDER>::merge(BTreeNode<T, ORDER> *root, int idx)
+{
+    // // BTreeNode<T, ORDER> *child
+}
 int main()
 {
     BTree<int, 3> t;
