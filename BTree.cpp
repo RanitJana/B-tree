@@ -215,11 +215,20 @@ void BTree<T, ORDER>::insertNonFull(BTreeNode<T, ORDER> *root, T value)
     else
     {
         // search pivot position for the value
-        while (idx >= 0 && value < root->keys[idx])
-            idx--;
+        int start = 0, end = root->n - 1, mid;
 
-        // increase the idx
-        idx++;
+        while (start <= end)
+        {
+            mid = (start + end) >> 1;
+
+            if (value <= root->keys[mid])
+            {
+                idx = mid;
+                start = mid + 1;
+            }
+            else
+                end = mid - 1;
+        }
 
         // current index's key is greater then the value
         // so the value must be inserted in the left child of current index
@@ -299,7 +308,7 @@ void BTree<T, ORDER>::remove(BTreeNode<T, ORDER> *root, T key)
         remove(root->children[idx], key);
 
         // balance the tree
-        if (root->children[idx]->n < ceil(ORDER - 2) - 1)
+        if (root->children[idx]->n < ceil(ORDER / 2) - 1)
             fill(root, idx);
 
         // pending / updation/ wrong
